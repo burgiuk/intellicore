@@ -43,33 +43,72 @@ class DoorCodesController extends Controller
      * @return int
      */
     public function calculateUnallocated():int{
+        // Get previous result from the DB
         $total = Unallocated::all()->first();
 
         if($total){
-            return $total;
+            return $total->TotalAvailable;
         }
 
+        // Maximum theoretical
         $allowedCharacters = range(0,9);
         $length = 6;
-        // Maximum theoretical
         $max =  pow(count($allowedCharacters),$length);
 
+        // Gets all currently in use codes
         $doorcodes=DoorCodes::all();
-
         $totalused = $doorcodes->count();
 
+        // Calculates total
         $total = $max - $totalused;
-dd($doorcodes);
-        $range = range('000000','999999');
 
+        $allcodes = $this->generateAllPossibleCodes();
+
+        // Loops through generated range
         for ($i = 0; $i < $max; $i++) {
+            // Checks if a code has already been taken away
+            if($doorcodes->contains('code','==',$allcodes[$i])){
+                continue;
+            }
+
             // Check restrictions
-            if(!$this->checkRestrictions($range[$i])){
+            if(!$this->checkRestrictions($allcodes[$i])){
                 $total--;
             }
         }
 
+        // Save total to speed up calculations
+        $unallocated = new Unallocated();
+        $unallocated->TotalAvailable = $total;
+        $unallocated->save();
+
         return $total;
+    }
+
+    /**
+     * This method generates all possible codes in a given character space.
+     * Inspired by https://stackoverflow.com/a/19067696/2505109
+     * @param int $length
+     * @return array|string[]
+     */
+    private function generateAllPossibleCodes(int $length = 6): array
+    {
+        // creates a range
+        $availableCharacters = range(0,9);
+
+        $current_set = array('');
+
+        for ($i = 0; $i < $length; $i++) {
+            $tmp_set = array();
+            foreach ($current_set as $curr_elem) {
+                foreach ($availableCharacters as $new_elem) {
+                    $tmp_set[] = $curr_elem . $new_elem;
+                }
+            }
+            $current_set = $tmp_set;
+        }
+
+        return $current_set;
     }
 
     /**

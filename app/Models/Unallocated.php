@@ -10,4 +10,6 @@ class Unallocated extends Model
     use HasFactory;
 
     protected $table = 'unallocated';
+
+    public $timestamps = false;
 }

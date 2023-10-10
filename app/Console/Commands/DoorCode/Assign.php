@@ -19,13 +19,24 @@ class Assign extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Assign a specific door code to a person';
 
     /**
      * Execute the console command.
      */
     public function handle()
     {
-        DoorCodesController::assignDoorCode('test','651234');
+        // TODO
+        // Ask for code
+
+
+        // Ask for name
+
+        $assigned = DoorCodesController::assignDoorCode($name,$code);
+        if(!$assigned){
+            // Failure message here
+        }
+
+        // Success message here
     }
 }
