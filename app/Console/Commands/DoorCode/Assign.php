@@ -4,6 +4,7 @@ namespace App\Console\Commands\DoorCode;
 
 use App\Http\Controllers\DoorCodesController;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Validator;
 
 class Assign extends Command
 {
@@ -26,13 +27,32 @@ class Assign extends Command
      */
     public function handle()
     {
-        // TODO
         // Ask for code
-
+        $code = $this->ask('Enter the code you want to assign');
 
         // Ask for name
+        $name = $this->ask('Enter the name of the person you want to assign '.$code.' to');
 
-        $assigned = DoorCodesController::assignDoorCode($name,$code);
+
+        $validator = Validator::make([
+            'name' => $name,
+            'code' => $code
+        ], [
+            'name' => 'required',
+            'code' => 'required|numeric',
+        ]);
+
+        if ($validator->fails()) {
+            $this->warn('Door code not assigned. See error messages below:');
+
+            foreach ($validator->errors()->all() as $error) {
+                $this->error($error);
+            }
+            return 1;
+        }
+
+        $doorcodes = new DoorCodesController();
+        $assigned = $doorcodes->assignDoorCode($name,$code);
         if(!$assigned){
             // Failure message here
         }

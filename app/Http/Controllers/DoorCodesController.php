@@ -35,7 +35,8 @@ class DoorCodesController extends Controller
      * @return void
      */
     public function assignDoorCode(string $name, string $code){
-        dd((new DoorCodesController)->checkSequenceLength($code));
+
+
     }
 
     /**
