@@ -29,6 +29,6 @@ class Unallocated extends Command
         $doorcodes = new DoorCodesController();
         $unallocated = $doorcodes->calculateUnallocated();
 
-        dd($unallocated);
+        $this->info('There are '.$unallocated.' unallocated codes available.');
     }
 }
