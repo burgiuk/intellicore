@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DoorCodes;
-use Illuminate\Http\Request;
+use App\Models\Unallocated;
 use Nette\Utils\Random;
 
 class DoorCodesController extends Controller
@@ -13,7 +13,7 @@ class DoorCodesController extends Controller
      * @param int $length
      * @return void
      */
-    public static function createDoorCodeFromName(string $name,int $length = 6){
+    public function createDoorCodeFromName(string $name,int $length = 6){
         $code = Random::generate($length,'0-9');
 
         $doorcode = new DoorCodes();
@@ -34,24 +34,56 @@ class DoorCodesController extends Controller
      * @param string $code
      * @return void
      */
-    public static function assignDoorCode(string $name, string $code){
+    public function assignDoorCode(string $name, string $code){
         dd((new DoorCodesController)->checkSequenceLength($code));
     }
 
     /**
-     * @param $code
+     * This method calculates total number of available codes
+     * @return int
+     */
+    public function calculateUnallocated():int{
+        $total = Unallocated::all()->first();
+
+        if($total){
+            return $total;
+        }
+
+        $allowedCharacters = range(0,9);
+        $length = 6;
+        // Maximum theoretical
+        $max =  pow(count($allowedCharacters),$length);
+
+        $doorcodes=DoorCodes::all();
+
+        $totalused = $doorcodes->count();
+
+        $total = $max - $totalused;
+dd($doorcodes);
+        $range = range('000000','999999');
+
+        for ($i = 0; $i < $max; $i++) {
+            // Check restrictions
+            if(!$this->checkRestrictions($range[$i])){
+                $total--;
+            }
+        }
+
+        return $total;
+    }
+
+    /**
+     * @param string $code
      * @return bool
      */
-    private function checkRestrictions($code){
+    private function checkRestrictions(string $code):bool{
         // Code cannot be a palindrome
         if($code === strrev($code)){
             return false;
         }
 
-
         $characters = [];
-        foreach ($code as $character) {
-            $character = $character->toString();
+        foreach (str_split($code) as $character) {
             if(!isset($characters[$character])){
                 $characters[$character] = 1;
                 continue;
@@ -68,6 +100,11 @@ class DoorCodesController extends Controller
         rsort($characters);
         $firstkey = array_key_first($characters);
         if($characters[$firstkey] > 3){
+            return false;
+        }
+
+        // Character cannot be in a sequence of more than 3
+        if(!$this->checkSequenceLength($code)){
             return false;
         }
 

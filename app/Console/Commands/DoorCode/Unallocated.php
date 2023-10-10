@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands\DoorCode;
 
+use App\Http\Controllers\DoorCodesController;
 use Illuminate\Console\Command;
 
 class Unallocated extends Command
@@ -18,13 +19,16 @@ class Unallocated extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Calculates the number of available codes';
 
     /**
      * Execute the console command.
      */
     public function handle()
     {
-        //
+        $doorcodes = new DoorCodesController();
+        $unallocated = $doorcodes->calculateUnallocated();
+
+        dd($unallocated);
     }
 }
