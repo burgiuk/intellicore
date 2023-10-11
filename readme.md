@@ -67,9 +67,10 @@ Unable to assign that code. Please try another code.
 doorcodes. Additionally, you might want to provide a GGUI for people to use. This could also
 take advantage of the API endpoints. 
 - Batch assignment, this would be useful for the initial population of employee codes. It 
-would be labourious to generate lots of codes manually 
+would be labourious to generate lots of codes manually.
 - Throw exceptions for business rule violations, this will give cleaner and more informative
 error messages to the user.
 - Include unit tests, these have not been included due to time constraints as well as not 
 being exposed to much TDD during my career. It is something I am working to remedy with 
 online courses from LinkedIn Learning.
+- Use GitFlow to branch the various features. I haven't done that this time as it was adding extra steps into a project that was very time restricted and only had a single developer working on it.
