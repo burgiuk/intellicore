@@ -100,6 +100,22 @@ class DoorCodesController extends Controller
         return $total;
     }
 
+    public function removeDoorCode(string $type,string $input){
+        $doorcode = DoorCodes::where($type,$input)->get();
+
+        $result = DoorCodes::destroy($doorcode);
+
+        $total = Unallocated::all()->first();
+        if($total){
+            $total->TotalAvailable = $total->TotalAvailable + $result;
+            $total->save();
+        }else{
+            $this->calculateUnallocated();
+        }
+
+        return true;
+    }
+
     /**
      * This method generates all possible codes in a given character space.
      * Inspired by https://stackoverflow.com/a/19067696/2505109

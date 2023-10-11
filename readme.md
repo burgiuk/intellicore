@@ -60,6 +60,26 @@ to check the details you entered and try again:
 Unable to assign that code. Please try another code.
 ```
 
+### Reset a Code or Name
+From time to time it might be necessary to reset a code from use for security reasons or if 
+an employee leaves. This can be done using the command:
+```shell
+docker-compose exec app php artisan doorcode:reset
+```
+You will then be given a choice to either rest a code or a name. Type the number associated 
+with the option you want and press return.
+```text
+ What would you like to reset?:
+  [0] code
+  [1] name
+```
+Next you will be asked to enter the code or the name you want to reset. Once you have done 
+that, press return and you will see the success message. In this example a code has been reset.
+```text
+435621 has been reset 
+```
+
+
 ## Improvements for next time
 
 - Don't include passwords in the env file when adding it to git
