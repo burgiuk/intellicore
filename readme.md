@@ -18,6 +18,24 @@ This will display the total number of door codes available to be allocated, simi
 There are 979973 unallocated codes available.
 ```
 
+### Assign a Specific Code 
+If you want to assign a specific code to someone you can do by using the follow command:
+```shell
+docker-compose exec app php artisan doorcode:assign
+```
+You will be then asked to enter the 6 digit code you want to allocate. Enter this and press return.
+
+Next you will be asked to enter the name of the person you would like the code to be associated with, again press return.
+
+If the assignment was successful you will see a message like:
+```text
+The code has been successfully assigned to Joe Bloggs
+```
+If the assignment was unsuccessful you will see a message like the one below. You will need to check the details you entered and try again:
+```text
+Unable to assign that code. Please try another code.
+```
+
 ## Improvements for next time
 
 - Don't include passwords in the env file when adding it to git

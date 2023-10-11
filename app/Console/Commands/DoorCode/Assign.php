@@ -50,7 +50,7 @@ class Assign extends Command
             $this->error('Unable to assign that code. Please try another code.');
         }
 
-        $this->info('Code has been successfully assigned to '.$validator->validated()['name']);
+        $this->info('The code has been successfully assigned to '.$validator->validated()['name']);
 
         return true;
     }
