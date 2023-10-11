@@ -11,5 +11,9 @@ class Unallocated extends Model
 
     protected $table = 'unallocated';
 
+    protected $primaryKey = null;
+
+    public $incrementing = false;
+
     public $timestamps = false;
 }

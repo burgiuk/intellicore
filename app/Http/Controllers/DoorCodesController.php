@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DoorCodes;
 use App\Models\Unallocated;
 use Nette\Utils\Random;
+use Illuminate\Support\Facades\Validator;
 
 class DoorCodesController extends Controller
 {
@@ -32,11 +33,37 @@ class DoorCodesController extends Controller
     /**
      * @param string $name
      * @param string $code
-     * @return void
+     * @return bool
      */
-    public function assignDoorCode(string $name, string $code){
+    public function assignDoorCode(string $name, string $code): bool
+    {
+        // Checks if the code is already used or if the person already has a code
+        $doorcode = DoorCodes::where('code',$code)->orWhere('name',$name)->get();
 
+        if($doorcode->count() > 0){
+            return false;
+        }
 
+        // Checks the code against the business rules
+        if(!$this->checkRestrictions($code)){
+            return false;
+        }
+
+        $doorcode = new DoorCodes();
+
+        $doorcode->name = $name;
+        $doorcode->code = $code;
+        $doorcode->save();
+
+        $total = Unallocated::all()->first();
+        if($total){
+            $total->TotalAvailable--;
+            $total->save();
+        }else{
+            $this->calculateUnallocated();
+        }
+
+        return true;
     }
 
     /**
@@ -196,5 +223,17 @@ class DoorCodesController extends Controller
 
         // Door code is valid
         return true;
+    }
+
+    public function validateInputs($name,$code){
+        $validator = Validator::make([
+            'name' => $name,
+            'code' => $code
+        ], [
+            'name' => 'required',
+            'code' => 'required|numeric|max_digits:6|min_digits:6',
+        ]);
+
+        return $validator;
     }
 }

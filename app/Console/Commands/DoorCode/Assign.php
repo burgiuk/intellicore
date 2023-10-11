@@ -33,30 +33,25 @@ class Assign extends Command
         // Ask for name
         $name = $this->ask('Enter the name of the person you want to assign '.$code.' to');
 
+        $doorcodes = new DoorCodesController();
+        $validator = $doorcodes->validateInputs($name,$code);
 
-        $validator = Validator::make([
-            'name' => $name,
-            'code' => $code
-        ], [
-            'name' => 'required',
-            'code' => 'required|numeric',
-        ]);
-
-        if ($validator->fails()) {
-            $this->warn('Door code not assigned. See error messages below:');
+        if($validator->fails()){
+            $this->warn('The code has not been assigned for the following reasons:');
 
             foreach ($validator->errors()->all() as $error) {
                 $this->error($error);
             }
-            return 1;
+            return false;
         }
 
-        $doorcodes = new DoorCodesController();
-        $assigned = $doorcodes->assignDoorCode($name,$code);
+        $assigned = $doorcodes->assignDoorCode($validator->validated()['name'],$validator->validated()['code']);
         if(!$assigned){
-            // Failure message here
+            $this->error('Unable to assign that code. Please try another code.');
         }
 
-        // Success message here
+        $this->info('Code has been successfully assigned to '.$validator->validated()['name']);
+
+        return true;
     }
 }
