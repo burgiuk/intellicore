@@ -12,22 +12,21 @@ class DoorCodesController extends Controller
     /**
      * @param string $name
      * @param int $length
-     * @return void
+     * @return string
      */
     public function createDoorCodeFromName(string $name,int $length = 6){
-        $code = Random::generate($length,'0-9');
 
-        $doorcode = new DoorCodes();
+        $check = false;
 
-        $doorcode->name = $name;
+        while($check === false){
+            $code = Random::generate($length,'0-9');
+            // Check restrictions
+            $check = $this->checkRestrictions($code);
+        }
 
-        // Check restrictions
+        $this->saveDoorCode($name,$code);
 
-        $doorcode->code = $code;
-
-        $doorcode->save();
-
-        dd($doorcode);
+        return $code;
     }
 
     /**
@@ -49,19 +48,7 @@ class DoorCodesController extends Controller
             return false;
         }
 
-        $doorcode = new DoorCodes();
-
-        $doorcode->name = $name;
-        $doorcode->code = $code;
-        $doorcode->save();
-
-        $total = Unallocated::all()->first();
-        if($total){
-            $total->TotalAvailable--;
-            $total->save();
-        }else{
-            $this->calculateUnallocated();
-        }
+        $this->saveDoorCode($name,$code);
 
         return true;
     }
@@ -140,10 +127,18 @@ class DoorCodesController extends Controller
     }
 
     /**
+     * This method checks that the code complies with the business rules
      * @param string $code
      * @return bool
      */
     private function checkRestrictions(string $code):bool{
+        // Check code isn't already used
+        $doorcode=DoorCodes::where('code',$code)->first();
+
+        if(!empty($doorcode->code)){
+            return false;
+        }
+
         // Code cannot be a palindrome
         if($code === strrev($code)){
             return false;
@@ -225,6 +220,12 @@ class DoorCodesController extends Controller
         return true;
     }
 
+    /**
+     * This method validates the inputs from the assign command
+     * @param $name
+     * @param $code
+     * @return \Illuminate\Validation\Validator
+     */
     public function validateInputs($name,$code){
         $validator = Validator::make([
             'name' => $name,
@@ -235,5 +236,28 @@ class DoorCodesController extends Controller
         ]);
 
         return $validator;
+    }
+
+    /**
+     * This method saves the door code to the database
+     * @param $name
+     * @param $code
+     * @return void
+     */
+    private function saveDoorCode($name,$code): void
+    {
+        $doorcode = new DoorCodes();
+
+        $doorcode->name = $name;
+        $doorcode->code = $code;
+        $doorcode->save();
+
+        $total = Unallocated::all()->first();
+        if($total){
+            $total->TotalAvailable--;
+            $total->save();
+        }else{
+            $this->calculateUnallocated();
+        }
     }
 }
